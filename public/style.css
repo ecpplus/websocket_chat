@@ -1,0 +1,21 @@
+#mainHeader {
+  color: #ffffff;
+  background: #000000;
+}
+
+#mainHeader ul li {
+  display: inline;
+}
+
+#mainSection {
+  margin-bottom: 160px;
+}
+
+#mainCanvas {
+  border: 1px solid #000000;
+}
+
+#mainFooter {
+  color: #ffffff;
+  background: #000000;
+}

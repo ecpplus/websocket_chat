@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>HTML5 Drawing</title>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="cpick.js"></script>
+    <script type="text/javascript" src="jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="modernizr-1.5.min.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script type="text/javascript">
+      var drawing = false;
+      var canvas;
+      var ctx;
+      var mouseX;
+      var mouseY;
+      var fillWidth = 1;
+      var tempLineData;
+      var ws;
+
+      $(document).ready(function() {
+        // 各種データの初期化
+        canvas = document.getElementById('mainCanvas');
+        ws = new WebSocket("ws://192.168.11.15:8080/chat?room=<%= @room %>&user=<%= @user %>");
+
+        // データの受信処理
+        ws.onmessage = function(evt) {
+          var data = JSON.parse(evt.data);
+          drawLine(data.start, data.middle, data.dest, data.color, data.width);
+        }
+
+        // 線幅
+        $('#widthSelect').change(function() {
+          fillWidth = parseInt($('#widthSelect').val());
+        });
+
+        // 以下、キャンバス関連
+        if(canvas) {
+          ctx = canvas.getContext("2d");
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          $('#mainCanvas').bind("mousedown", function() {
+            tempLineData = {};
+            tempLineData.coodinates = new Array();
+            tempLineData.color = $('#colorBox').val() ? $('#colorBox').val() : '#000000';
+            tempLineData.width = fillWidth;
+            drawing = true;
+          });
+          $('#mainCanvas').bind("mouseup", function() {
+            drawing = false;
+          });
+          $('#mainCanvas').bind("mouseout", function() {
+            drawing = false;
+          });
+          $('#mainCanvas').mousemove(function(e) {
+            if(drawing) {
+              adjustXY(e);
+              tempLineData.coodinates.push({x: mouseX, y:mouseY});
+
+              if(tempLineData.coodinates.length >= 3) {
+                var start = tempLineData.coodinates.shift();
+                var middle = tempLineData.coodinates[0];
+                var dest = tempLineData.coodinates[1];
+                var jsonStr = '{start: {x: ' + start.x + ', y: ' + start.y + '}, middle: {x: ' + middle.x + ', y: ' + middle.y + '}, dest: {x: ' + dest.x + ', y: ' + dest.y + '}, color: "' + tempLineData.color + '", width: ' + tempLineData.width + '}';
+
+                drawLine(start, middle, dest, tempLineData.color, tempLineData.width);
+                // データの送信
+                ws.send(jsonStr);
+              }
+            }
+          });
+
+          $('#clearButton').removeAttr('disabled');
+          $('#clearButton').click(function() {
+            if(window.confirm('キャンバス消します')) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+          });
+
+          if(Modernizr.localstorage) {
+            $('#saveButton').removeAttr('disabled');
+            $('#saveButton').click(function() {
+              if(window.confirm('すでにデータがあるなら上書きされます')) {
+                window.localStorage.imageData = canvas.toDataURL("image/png");
+              }
+            });
+
+            if(window.localStorage.imageData) {
+              $('#loadButton').removeAttr('disabled');
+              $('#loadButton').click(function() {
+                if(window.confirm('データロード、保存してないデータは消えます')) {
+                  var image = new Image();
+                  image.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                  }
+                  image.src = window.localStorage.imageData;
+                }
+              });
+            }
+          }
+        }
+      });
+
+      // 座標の補正
+      function adjustXY(e) {
+        var rect = e.target.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+      }
+
+      // 実線の描画
+      function drawLine(start, middle, dest, color, width) {
+        var x1 = (start.x + middle.x) / 2;
+        var x2 = (dest.x + middle.x) / 2;
+        var y1 = (start.y + middle.y) / 2;
+        var y2 = (dest.y + middle.y) / 2;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.quadraticCurveTo(middle.x, middle.y, x2, y2);
+        ctx.stroke();
+      }
+    </script>
+  </head>
+  <body>
+    <header id="mainHeader">
+      <h1>おえかきツール</h1>
+      <h2>HTML5のテスト</h2>
+      <nav>
+        <ul>
+          <li>メニュー</li>
+          <li>を</li>
+          <li>いれる</li>
+        </ul>
+      </nav>
+    </header>
+      <section id="mainSection">
+        <canvas id="mainCanvas" width="640" height="480"></canvas>
+        <section>
+          <label>線幅</label>
+          <select name="widthSelect" id="widthSelect">
+            <option value="1" selected="selected">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+          </select>
+        </section>
+        <section>
+          <label>色選択</label>
+          <input type="text" class="html5jp-cpick [coloring:true]" name="colorBox" id="colorBox" value="" size="12" />
+        </section>
+        <section>
+          <label>保存（しょぼいブラウザだと動かない）</label>
+          <button type="button" name="saveButton" id="saveButton" disabled="disabled">Save</button>
+        </section>
+        <section>
+          <label>ロード（データ保存した時以外使えない）</label>
+          <button type="button" name="loadButton" id="loadButton" disabled="disabled">Load</button>
+        </section>
+        <section>
+          <label>キャンバスクリア</label>
+          <button type="button" name="clearButton" id="clearButton" disabled="disabled">Clear</button>
+        </section>
+      </section>
+    <footer id="mainFooter">
+      <address>Ababababa</address>
+    </footer>
+  </body>
+</html>
