@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <title>HTML5 Drawing</title>
     <meta charset="utf-8" />
-    <script type="text/javascript" src="cpick.js"></script>
-    <script type="text/javascript" src="jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="modernizr-1.5.min.js"></script>
-    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>HTML5 Drawing</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/2.8.0r4/build/reset/reset-min.css"> 
+    <link rel="stylesheet" href="/style.css" type="text/css" />
+    <script type="text/javascript" src="/cpick.js"></script>
+    <script type="text/javascript" src="/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/modernizr-1.5.min.js"></script>
     <script type="text/javascript">
       var drawing = false;
       var canvas;
@@ -15,15 +16,43 @@
       var mouseY;
       var fillWidth = 1;
       var tempLineData;
-      var ws;
+      var ws_paint;
+      var ws_chat;
 
       $(document).ready(function() {
+        /** お絵かきの処理 **/
+        var message = function(str){ $("#msg").prepend(str); };
+
+        var post_comment = function() {
+          ws_chat.send($('#comment').val());
+          $('#comment').val('');
+        }
+
+        ws_chat = new WebSocket("ws://192.168.11.15:8080/chat?room=<%= @room %>&user=<%= @user %>");
+        ws_chat.onmessage = function(evt) { 
+          var data = JSON.parse(evt.data);
+          $("#comments").prepend([
+              "<tr><td class='user_name'>", data['user'], "</td><td class='comment'>",
+              data['comment'], "</td><td class='time'>", data['time'], "</td></tr>"
+            ].join('')); 
+        };
+        ws_chat.onclose = function() { message("接続が解除されました。"); };
+        ws_chat.onopen = function()  { message("入室しました。"); }
+        
+        $("#comment_form").submit(function(e){
+          post_comment();
+          return false;
+        });
+
+        /** お絵かきの処理 **/
+
         // 各種データの初期化
         canvas = document.getElementById('mainCanvas');
-        ws = new WebSocket("ws://192.168.11.15:8080/chat?room=<%= @room %>&user=<%= @user %>");
+        ws_paint = new WebSocket("ws://192.168.11.15:8080/paint?room=<%= @room %>&user=<%= @user %>");
 
         // データの受信処理
-        ws.onmessage = function(evt) {
+        ws_paint.onmessage = function(evt) {
+          console.log(evt.data);
           var data = JSON.parse(evt.data);
           drawLine(data.start, data.middle, data.dest, data.color, data.width);
         }
@@ -65,7 +94,8 @@
 
                 drawLine(start, middle, dest, tempLineData.color, tempLineData.width);
                 // データの送信
-                ws.send(jsonStr);
+                //ws_paint.send(jsonStr);
+                ws_paint.send(JSON.stringify({'start': start, 'middle': middle, 'dest': dest, 'color': tempLineData.color, 'width': tempLineData.width}));
               }
             }
           });
@@ -163,6 +193,17 @@
           <label>キャンバスクリア</label>
           <button type="button" name="clearButton" id="clearButton" disabled="disabled">Clear</button>
         </section>
+      </section>
+      <section id="chatSection">
+        <div id="form">
+          <form id=comment_form>
+            <input type=text id=comment />
+            <input type=submit id=submit value=送信 />
+          </form>
+          <span id=msg></span>
+        </div>
+        <table id="comments">
+        </table>
       </section>
     <footer id="mainFooter">
       <address>Ababababa</address>

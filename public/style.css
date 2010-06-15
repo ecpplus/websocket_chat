@@ -9,6 +9,12 @@
 
 #mainSection {
   margin-bottom: 160px;
+  float: left;
+  width: 650px;
+}
+
+#chatSection {
+  padding-left: 650px;
 }
 
 #mainCanvas {
@@ -16,6 +22,10 @@
 }
 
 #mainFooter {
+  clear: left;
   color: #ffffff;
   background: #000000;
 }
+
+#comments {border-bottom: 1px dotted #ccc;}
+#comments td{border-top: 1px dotted #ccc;}

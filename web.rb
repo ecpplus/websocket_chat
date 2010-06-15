@@ -14,7 +14,7 @@ end
 post '/room' do
   @room = CGI.escape(params[:title])
   @user = CGI.escape(params[:user])
-  erb :room
+  erb :sample
 end
 
 get '/room' do
