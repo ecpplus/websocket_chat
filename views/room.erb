@@ -17,7 +17,7 @@
       $(document).ready(function(){
         function message(str){ $("#msg").prepend(str); };
 
-        ws = new WebSocket("ws://192.168.11.15:8080/?room=<%= @room %>&user=<%= @user %>");
+        ws = new WebSocket("ws://192.168.11.15:8080/chat?room=<%= @room %>&user=<%= @user %>");
         ws.onmessage = function(evt) { 
           var data = JSON.parse(evt.data);
           $("#comments").prepend([
