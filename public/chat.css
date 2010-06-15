@@ -1,6 +1,6 @@
 
 #comments {border-bottom: 1px dotted #ccc;}
 #comments td{border-top: 1px dotted #ccc;}
-#comments .user_name {width: 150px; text-align:right; padding-right: 20px;}
+#comments .user_name {width: 150px; text-align:left; padding-right: 20px;}
 #comments .comment   {width: 400px; text-align:left;  padding-right: 20px;}
-#comments .time      {width: 80px;  text-align:left;  font-size:smaller;}
+#comments .time      {width: 40px;  text-align:left;  font-size:smaller;}

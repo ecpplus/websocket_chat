@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'em-websocket/lib/em-websocket'
 require 'cgi'
+require 'uri'
 require 'json'
 #require 'sinatra'
 require 'thin'
@@ -12,7 +13,7 @@ EventMachine.run {
   @paint_channels = {} 
   @chat_channels  = {} 
 
-  EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8080, :debug => true) do |ws|
+  EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8080, :debug => false) do |ws|
     ws.onopen {
       room_name = ws.request['Query']['room']
       user_name = ws.request['Query']['user']
@@ -23,7 +24,7 @@ EventMachine.run {
         # チャンネルを取得(or作成)して、そこに入る
         channel = @chat_channels[room_name] || (@chat_channels[room_name] = EM::Channel.new)
         channel.push({
-          :user => ERB::Util.h("システムから"), 
+          :user => ERB::Util.h("システム"), 
           :comment => ERB::Util.h("#{user_name}さんがチャットに参加しました。"), 
           :time => Time.now.strftime('%H:%M'),
           :user_id => 0

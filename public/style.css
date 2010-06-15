@@ -1,6 +1,12 @@
+a, a:hover, a:visited {
+  color: white;
+  font-weight: bold;
+}
+
 #mainHeader {
   color: #ffffff;
   background: #000000;
+  padding: 10px;
 }
 
 #mainHeader ul li {
@@ -8,13 +14,17 @@
 }
 
 #mainSection {
-  margin-bottom: 160px;
+  margin-bottom: 10px;
+  padding: 10px;
   float: left;
-  width: 650px;
+  width: 660px;
+  line-height: 2;
 }
 
 #chatSection {
-  padding-left: 650px;
+  padding-left: 670px;
+  padding-top: 10px;
+  width : 400px;
 }
 
 #mainCanvas {
@@ -25,7 +35,11 @@
   clear: left;
   color: #ffffff;
   background: #000000;
+  padding: 10px;
 }
 
-#comments {border-bottom: 1px dotted #ccc;}
-#comments td{border-top: 1px dotted #ccc;}
+#comments {border-bottom: 1px dotted #ccc; line-height: 2;}
+#comments td{border-top: 1px dotted #ccc; font-size: small;}
+#comments .user_name {width: 80px; text-align:right; padding-right: 10px;}
+#comments .comment   {width: 300px; text-align:left;  padding-right: 10px;}
+#comments .time      {width: 40px;  text-align:left;  font-size:x-small;}
