@@ -45,7 +45,7 @@ EventMachine.run {
         # チャンネルを取得(or作成)して、そこに入る
         channel = @paint_channels[room_name] || (@paint_channels[room_name] = EM::Channel.new)
         sid = channel.subscribe { |msg| ws.send msg }
-        ws.onmessage { |msg| p msg; channel.push(msg) }
+        ws.onmessage { |msg| channel.push(msg) }
         ws.onclose { channel.unsubscribe(sid) }
       end
     }
