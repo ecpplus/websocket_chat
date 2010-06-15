@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style type="text/css">  
+    <!-- 
+      #comments {border-bottom: 1px dotted #ccc;}
+      #comments td{border-top: 1px dotted #ccc;}
+      #comments .user_name {width: 150px; text-align:right; padding-right: 20px;}
+      #comments .comment   {width: 400px; text-align:left;  padding-right: 20px;}
+      #comments .time      {width: 80px;  text-align:left;  font-size:smaller;}
+    -->  
+    </style>  
+
+    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js'></script>
+    <script>
+      $(document).ready(function(){
+        function message(str){ $("#msg").prepend(str); };
+
+        ws = new WebSocket("ws://192.168.11.15:8080/?room=<%= @room %>&user=<%= @user %>");
+        ws.onmessage = function(evt) { 
+          var data = JSON.parse(evt.data);
+          $("#comments").prepend([
+              "<tr><td class='user_name'>", data['user'], "</td><td class='comment'>",
+              data['comment'], "</td><td class='time'>", data['time'], "</td></tr>"
+            ].join('')); 
+        };
+        ws.onclose = function() { message("接続が解除されました。"); };
+        ws.onopen = function()  { message("入室しました。"); }
+        
+        $("#comment_form").submit(function(e){
+          post_comment();
+          return false;
+        });
+      });
+
+      var post_comment = function() {
+        ws.send($('#comment').val());
+        $('#comment').val('');
+      }
+    </script>
+  </head>
+  <body>
+    <div id="form">
+      <form id=comment_form>
+        <input type=text id=comment />
+        <input type=submit id=submit value=送信 />
+      </form>
+      <span id=msg></span>
+    </div>
+    <table id="comments">
+    
+    </table>
+  </body>
+</html>
