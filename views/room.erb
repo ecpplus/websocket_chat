@@ -96,7 +96,7 @@
                 var middle = tempLineData.coodinates[0];
                 var dest = tempLineData.coodinates[1];
 
-                //drawLine(start, middle, dest, tempLineData.color, tempLineData.width);
+                drawLine(start, middle, dest, tempLineData.color, tempLineData.width);
                 // データの送信
                 ws_paint.send(JSON.stringify({'start': start, 'middle': middle, 'dest': dest, 'color': tempLineData.color, 'width': tempLineData.width}));
               }
