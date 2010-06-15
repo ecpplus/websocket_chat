@@ -2,24 +2,36 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <title>おえかきちゃっと♥</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/2.8.0r4/build/reset/reset-min.css"> 
-    <link rel="stylesheet" href="/chat.css"> 
-    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js'></script>
+    <link rel="stylesheet" href="/style.css"> 
+    <script src='/jquery-1.4.2.min.js'></script>
+    <script src='/modernizr-1.5.min.js'></script>
     <!--[if IE]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <! [endif]-->
+    <script type="text/javascript">
+      $(document).ready(function() {
+        if (Modernizr.canvas && Modernizr.websockets){
+          $("#loginSection").show();
+        } else {
+          $("#nonSupportedAlert").show();
+        }
+      });
+    </script>
   </head>
   <body>
     <header>
-      <h1>チャット</h1>
+      <h1>おえかきちゃっと♥</h1>
     </header>
   
     <section>
       <h2>これは？</h2>
-      <p>HTML5 の WebSocket を使ったチャットです。Safari5, Google Chrome, Chromium あたりで動きます。</p>
-      <p>サーバ側は、Ruby の <a href="http://github.com/igrigorik/em-websocket" target="_blank">em-websocket</a> を使っています。</p>
+      <p>HTML5 の Canvas と WebSocket を使ったおえかきチャットです。Safari5, Google Chrome, Chromium あたりで動きます。</p>
+      <p>サーバ側は、Ruby の <a href="http://github.com/igrigorik/em-websocket" target="_blank" style="color: #66f;">em-websocket</a> を使っています。</p>
+      <p>「部屋」に同じ文字を入力した人とおえかきチャットが出来ます。部屋は何人でも入れます。</p>
     </section>
-    <section>
+    <section id=loginSection style="display: none">
       <form action="room" id=login method="POST">
         <label for=title>部屋 :</label>
         <input type=text id=title name=title size=20 /><br />
@@ -28,5 +40,13 @@
         <input type=submit id=submit value="部屋を作成 or 入室" />
       </form>
     </section>
+    <section id=nonSupportedAlert style="display: none">
+      <p>お使いのブラウザでは、おえかきチャットをすることが出来ません。</p>
+      <p><a href="http://www.google.co.jp/chrome/" target="_blank" style="color: #66f;">Google chrome</a> をインストールすれば使えます。もしくは、Safari5 か Chromium でも動きます。</p>
+    </section>
+
+    <footer>
+      <address>Created by <a href="http://twitter.com/projecthl2" target="_blank">@projecthl2</a> &amp; <a href="http://twitter.com/ecpplus" target="_blank">@ecpplus</a></address>
+    </footer>
   </body>
 </html>

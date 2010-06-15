@@ -3,19 +3,29 @@ a, a:hover, a:visited {
   font-weight: bold;
 }
 
-#mainHeader {
+header {
+  display: block;
   color: #ffffff;
   background: #000000;
   padding: 10px;
 }
 
-#mainHeader ul li {
+header ul li {
   display: inline;
+}
+
+section {
+  padding: 10px;
+  display: block;
+}
+
+h2 {
+  font-size:large;
+  font-weight:bold; 
 }
 
 #mainSection {
   margin-bottom: 10px;
-  padding: 10px;
   float: left;
   width: 660px;
   line-height: 2;
@@ -23,7 +33,6 @@ a, a:hover, a:visited {
 
 #chatSection {
   padding-left: 670px;
-  padding-top: 10px;
   width : 400px;
 }
 
@@ -31,11 +40,12 @@ a, a:hover, a:visited {
   border: 1px solid #000000;
 }
 
-#mainFooter {
+footer {
   clear: left;
   color: #ffffff;
   background: #000000;
   padding: 10px;
+  display: block;
 }
 
 #comments {border-bottom: 1px dotted #ccc; line-height: 2;}
