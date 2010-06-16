@@ -54,7 +54,8 @@ post '/twitter' do
     f.write Base64.decode64(request.body.read.split(',')[1])
   end
 
-  "http://" + request.host + '/show/' + filename
+  message = " お絵かきしたよ！ " + "http://" + request.host + '/show/' + filename + ' #paintchat '
+  {:plain => message, :encoded => URI.encode(message)}.to_json
 end
 
 get '/show/:filename' do

@@ -205,14 +205,16 @@
 
               twitterRequest.onreadystatechange = function() {
                 if(twitterRequest.readyState == 4 && twitterRequest.status == 200) {
-                  var addr = ['https://twitter.com/?status=', twitterRequest.responseText].join('');
-                  var target = $('#twitterSection');
-                  target.append('<a href="' + addr + '" target="_blank">Twitterへ投稿</a>');
-                  target.append('<textarea rows="2" cols="20">' + addr + '</textarea>');
-                  target.show('slow');
+                  var data = JSON.parse(twitterRequest.responseText);
+                  var addr = ['http://twitter.com/?status=', data['encoded']].join('');
+                  $('#twitterSection').html([
+                    '<textarea rows="2" cols="60" style="font-size:small;">', data['plain'], '</textarea><br />',
+                    '<a href="' + addr + '" target="_blank">Twitterへ投稿</a>',
+                  ].join(''));
+                  $('#twitterSection').show('slow');
                 }
               }
-              twitterRequest.open('POST', 'twitter');
+              twitterRequest.open('POST', '/twitter');
               twitterRequest.send(canvas.toDataURL('image/png'));
             });
 
