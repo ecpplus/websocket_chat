@@ -69,19 +69,19 @@
         $('#fileSelect').change(function() {
           var file = document.getElementById('fileSelect').files[0];
           
-          //if(window.confirm('お前、それでいいのか？')) {
-          var uploadRequest = new XMLHttpRequest();
-
-          uploadRequest.onreadystatechange = function(){
-            if( uploadRequest.readyState == 4 && uploadRequest.status == 200 ){
-              var sourceStr = ['data:', file.type, ';base64,', uploadRequest.responseText].join('');
-              loadImage(sourceStr);
-              ws_paint.send(JSON.stringify({'loadImage':true, 'imageData': sourceStr}));
+          if(window.confirm('お前、それでいいのか？')) {
+            var uploadRequest = new XMLHttpRequest();
+           
+            uploadRequest.onreadystatechange = function(){
+              if( uploadRequest.readyState == 4 && uploadRequest.status == 200 ){
+                var sourceStr = ['data:', file.type, ';base64,', uploadRequest.responseText].join('');
+                loadImage(sourceStr);
+                ws_paint.send(JSON.stringify({'loadImage':true, 'imageData': sourceStr}));
+              }
             }
+            uploadRequest.open('POST', '/upload');
+            uploadRequest.send(file);
           }
-          uploadRequest.open('POST', '/upload');
-          uploadRequest.send(file);
-          //}
         });
 
         // データの受信処理
@@ -158,7 +158,7 @@
             var image = new Image();
             image.onload = function() {
               ctx.clearRect(0, 0, canvas.width, canvas.height);
-              ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+              ctx.drawImage(image, 0, 0, image.width, image.height);
             }
             image.src = imageData;
           }
@@ -180,6 +180,19 @@
                 window.localStorage.imageData = canvas.toDataURL("image/png");
                 attachLoadImageEvent();
               }
+            });
+
+            $('#twitterButton').removeAttr('disabled');
+            $('#twitterButton').click(function() {
+              var twitterRequest = new XMLHttpRequest();
+
+              twitterRequest.onreadystatechange = function() {
+                if(twitterRequest.readyState == 4 && twitterRequest.status == 200) {
+                  window.open(['https://twitter.com/?status=', twitterRequest.responseText].join(''));
+                }
+              }
+              twitterRequest.open('POST', 'twitter');
+              twitterRequest.send(canvas.toDataURL('image/png'));
             });
 
             if(window.localStorage.imageData) attachLoadImageEvent();
@@ -240,6 +253,7 @@
       </section>
       <section>
         <button type="button" name="saveButton" id="saveButton" disabled="disabled">保存</button>
+        <button type="button" name="twitterButton" id="twitterButton" disabled="disabled">Twitterに投稿</button>
         <button type="button" name="loadButton" id="loadButton" disabled="disabled">ロード</button>
         <input id="fileSelect" type="file" />
         <button type="button" name="clearButton" id="clearButton" disabled="disabled">クリア</button>

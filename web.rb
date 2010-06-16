@@ -7,6 +7,10 @@ require 'sinatra'
 require 'thin'
 require 'logger'
 # coding: utf8
+require 'tokyocabinet'
+include TokyoCabinet
+
+tdb = TDB.new
 
 get '/' do
   @message = '部屋名と名前は必須です。' if params[:nodata] == '1'
@@ -33,6 +37,20 @@ end
 
 post '/upload' do
   Base64.encode64(request.body.read)
-  #p request.methods.sort
-  #p request.raw_data
+end
+
+post '/twitter' do
+  tdb.open('db/data.tct', TDB::OWRITER | TDB::OCREAT) # データの保存先指定など
+  filename = tdb.addint('max_id', 1).to_i.to_s(36)
+  tdb.close
+  File.open('public/i/' + filename, 'w') do |f|
+    f.write Base64.decode64(request.body.read.split(',')[1])
+  end
+
+  "http://" + request.host + '/show/' + filename
+end
+
+get '/show/:filename' do
+  @filename = params[:filename]
+  erb :show
 end
