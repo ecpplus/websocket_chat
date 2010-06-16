@@ -47,7 +47,7 @@ post '/twitter' do
     f.write Base64.decode64(request.body.read.split(',')[1])
   end
 
-  '/show/' + filename
+  "http://" + request.host + '/show/' + filename
 end
 
 get '/show/:filename' do

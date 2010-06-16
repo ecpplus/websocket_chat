@@ -188,8 +188,7 @@
 
               twitterRequest.onreadystatechange = function() {
                 if(twitterRequest.readyState == 4 && twitterRequest.status == 200) {
-                  document.location = twitterRequest.responseText;
-                  //console.log(twitterRequest.responseText);
+                  window.open(['https://twitter.com/?status=', twitterRequest.responseText].join(''));
                 }
               }
               twitterRequest.open('POST', 'twitter');
