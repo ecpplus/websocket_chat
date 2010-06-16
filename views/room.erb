@@ -64,12 +64,22 @@
         canvas = document.getElementById('mainCanvas');
         ws_paint = new WebSocket("ws://<%= request.host %>:8080/paint?room=<%= @room %>&user=<%= @user %>");
         fillWidth = parseInt($('#widthSelect').val());
+        $('#twitterSection').hide();
 
         // 画像のアップロード
         $('#fileSelect').change(function() {
           var file = document.getElementById('fileSelect').files[0];
-          
+
+          if(file) {
+            $('#uploadButton').removeAttr('disabled');
+          }else {
+            $('#uploadButton').attr('disabled', 'disabled');
+          }
+        });
+
+        $('#uploadButton').click(function() {
           if(window.confirm('お前、それでいいのか？')) {
+            var file = document.getElementById('fileSelect').files[0];
             var uploadRequest = new XMLHttpRequest();
            
             uploadRequest.onreadystatechange = function(){
@@ -182,13 +192,18 @@
               }
             });
 
+            // Twitterに投稿
             $('#twitterButton').removeAttr('disabled');
             $('#twitterButton').click(function() {
               var twitterRequest = new XMLHttpRequest();
 
               twitterRequest.onreadystatechange = function() {
                 if(twitterRequest.readyState == 4 && twitterRequest.status == 200) {
-                  window.open(['https://twitter.com/?status=', twitterRequest.responseText].join(''));
+                  var addr = ['https://twitter.com/?status=', twitterRequest.responseText].join('');
+                  var target = $('#twitterSection');
+                  target.append('<a href="' + addr + '" target="_blank">Twitterへ投稿</a>');
+                  target.append('<textarea rows="2" cols="20">' + addr + '</textarea>');
+                  target.show('slow');
                 }
               }
               twitterRequest.open('POST', 'twitter');
@@ -246,18 +261,20 @@
           <option value="7">7px</option>
           <option value="530000">53万px</option>
         </select>
-      </section>
-      <section>
         <label>色選択 :</label>
         <input type="text" class="html5jp-cpick [coloring:true]" name="colorBox" id="colorBox" value="" size="12" />
       </section>
       <section>
-        <button type="button" name="saveButton" id="saveButton" disabled="disabled">保存</button>
+        <div>
+          <input id="fileSelect" type="file" />
+          <button type="button" name="uploadButton" id="uploadButton" disabled="disabled">画像のアップロード</button>
+        </div>
+        <div>
+          <button type="button" name="clearButton" id="clearButton" disabled="disabled">クリア</button>
+        </div>
         <button type="button" name="twitterButton" id="twitterButton" disabled="disabled">Twitterに投稿</button>
-        <button type="button" name="loadButton" id="loadButton" disabled="disabled">ロード</button>
-        <input id="fileSelect" type="file" />
-        <button type="button" name="clearButton" id="clearButton" disabled="disabled">クリア</button>
       </section>
+      <section id="twitterSection"></section>
     </section>
     <section id="chatSection">
       <h2>チャット</h2>
