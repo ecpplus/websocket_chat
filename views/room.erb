@@ -51,7 +51,7 @@
             ].join('')); 
         };
         ws_chat.onclose = function() { message("接続が解除されました。"); };
-        ws_chat.onopen  = function() { }//message("入室しました。"); }
+        ws_chat.onopen  = function() { }; //message("入室しました。"); }
         
         $("#comment_form").submit(function(e){
           post_comment();
