@@ -26,6 +26,7 @@ post '/room' do
     redirect '/?nodata=1'
   end
 
+  @room_name = ERB::Util.h(params[:title])
   @room = CGI.escape(ERB::Util.h(params[:title]))
   @user = CGI.escape(ERB::Util.h(params[:user]))
   erb :room
@@ -33,6 +34,12 @@ end
 
 get '/room' do
   redirect '/'
+end
+
+post '/save' do
+  content_type :png
+  send_data request.body.read 
+  #send_file 'web.rb'
 end
 
 post '/upload' do

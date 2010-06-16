@@ -176,10 +176,16 @@
 
             $('#saveButton').removeAttr('disabled');
             $('#saveButton').click(function() {
-              if(window.confirm('すでにデータがあるなら上書きされます')) {
-                window.localStorage.imageData = canvas.toDataURL("image/png");
-                attachLoadImageEvent();
+              var savexhr = new XMLHttpRequest();
+
+              savexhr.onreadystatechange = function() {
+                if(savexhr.readyState == 4 && savexhr.status == 200) {
+                  //savexhr.responseText].join(''));
+                  //window.open(['https://twitter.com/?status=', savexhr.responseText].join(''));
+                }
               }
+              savexhr.open('POST', 'save');
+              savexhr.send(canvas.toDataURL('image/png'));
             });
 
             $('#twitterButton').removeAttr('disabled');
@@ -260,7 +266,7 @@
       </section>
     </section>
     <section id="chatSection">
-      <h2>チャット</h2>
+      <h2>チャット (部屋名: <%= @room_name %>)</h2>
       <div id="form">
         <form id=comment_form>
           <input type=text id=comment size=30 />
