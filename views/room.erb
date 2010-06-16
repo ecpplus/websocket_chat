@@ -64,6 +64,29 @@
         ws_paint = new WebSocket("ws://<%= request.host %>:8080/paint?room=<%= @room %>&user=<%= @user %>");
         fillWidth = parseInt($('#widthSelect').val());
 
+        // 画像のアップロード
+        $('#fileSelect').change(function() {
+          var file = document.getElementById('fileSelect').files[0];
+          
+          //if(window.confirm('お前、それでいいのか？')) {
+          var uploadRequest = new XMLHttpRequest();
+
+          uploadRequest.onreadystatechange = function(){
+            if( uploadRequest.readyState == 4 && uploadRequest.status == 200 ){
+              var sourceStr = ['data:', file.type, ';base64,', uploadRequest.responseText].join('');
+              var image = new Image();
+              image.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(image, 0, 0, image.width, image.height);
+              }
+              image.src = sourceStr;
+            }
+          }
+          uploadRequest.open('POST', '/upload');
+          uploadRequest.send(file);
+          //}
+        });
+
         // データの受信処理
         ws_paint.onmessage = function(evt) {
           var data = JSON.parse(evt.data);
@@ -205,6 +228,7 @@
       <section>
         <button type="button" name="saveButton" id="saveButton" disabled="disabled">保存</button>
         <button type="button" name="loadButton" id="loadButton" disabled="disabled">ロード</button>
+        <input id="fileSelect" type="file" />
         <button type="button" name="clearButton" id="clearButton" disabled="disabled">クリア</button>
       </section>
     </section>
