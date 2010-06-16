@@ -167,6 +167,20 @@
               }
             });
 
+            $('#twitterButton').removeAttr('disabled');
+            $('#twitterButton').click(function() {
+              var twitterRequest = new XMLHttpRequest();
+
+              twitterRequest.onreadystatechange = function() {
+                if(twitterRequest.readyState == 4 && twitterRequest.status == 200) {
+                  document.location = twitterRequest.responseText;
+                  //console.log(twitterRequest.responseText);
+                }
+              }
+              twitterRequest.open('POST', 'twitter');
+              twitterRequest.send(canvas.toDataURL('image/png'));
+            });
+
             if(window.localStorage.imageData) {
               attachLoadImageEvent();
             }
@@ -227,6 +241,7 @@
       </section>
       <section>
         <button type="button" name="saveButton" id="saveButton" disabled="disabled">保存</button>
+        <button type="button" name="twitterButton" id="twitterButton" disabled="disabled">Twitterに投稿</button>
         <button type="button" name="loadButton" id="loadButton" disabled="disabled">ロード</button>
         <input id="fileSelect" type="file" />
         <button type="button" name="clearButton" id="clearButton" disabled="disabled">クリア</button>
