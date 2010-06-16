@@ -31,14 +31,24 @@ h2 {
   line-height: 2;
 }
 
+#mainCanvas {
+  border: 1px solid #000000;
+}
+
 #chatSection {
   padding-left: 670px;
   width : 400px;
 }
 
-#mainCanvas {
-  border: 1px solid #000000;
+#memberList {
+  font-weight: bold;
+  font-size: small;
 }
+
+#memberList #members{
+  font-weight: normal;
+}
+
 
 footer {
   clear: left;

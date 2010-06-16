@@ -12,6 +12,7 @@ EventMachine.run {
   @logger = Logger.new('log/chat.log')
   @paint_channels = {} 
   @chat_channels  = {} 
+  @members        = {}
 
   EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8080, :debug => false) do |ws|
     ws.onopen {
@@ -23,14 +24,11 @@ EventMachine.run {
       when '/chat'
         # チャンネルを取得(or作成)して、そこに入る
         channel = @chat_channels[room_name] || (@chat_channels[room_name] = EM::Channel.new)
-        channel.push({
-          :user => ERB::Util.h("システム"), 
-          :comment => ERB::Util.h("#{user_name}さんがチャットに参加しました。"), 
-          :time => Time.now.strftime('%H:%M'),
-          :user_id => 0
-        }.to_json) #<#{sid}> "
+        members = @members[room_name] || (@members[room_name] = [])
+        members << ERB::Util.h(user_name)
+
         sid = channel.subscribe { |msg| ws.send msg }
-    
+
         ws.onmessage { |msg|
           channel.push({
             :user => ERB::Util.h(user_name), 
@@ -40,7 +38,25 @@ EventMachine.run {
           }.to_json) #<#{sid}> "
         }
 
-        ws.onclose { channel.unsubscribe(sid) }
+        ws.onclose { 
+          members.delete(ERB::Util.h(user_name))
+          channel.push({
+            :user => ERB::Util.h("システム"), 
+            :comment => ERB::Util.h("#{user_name}さんがチャットから離脱しました。"), 
+            :time => Time.now.strftime('%H:%M'),
+            :user_id => 0,
+            :members => members,
+          }.to_json) #<#{sid}> "
+          channel.unsubscribe(sid) 
+        }
+    
+        channel.push({
+          :user => ERB::Util.h("システム"), 
+          :comment => ERB::Util.h("#{user_name}さんがチャットに参加しました。"), 
+          :time => Time.now.strftime('%H:%M'),
+          :user_id => 0,
+          :members => members,
+        }.to_json) #<#{sid}> "
       when '/paint'
         # チャンネルを取得(or作成)して、そこに入る
         channel = @paint_channels[room_name] || (@paint_channels[room_name] = EM::Channel.new)

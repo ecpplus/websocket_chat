@@ -22,9 +22,12 @@
       var ws_chat;
 
       $(document).ready(function() {
-        /** お絵かきの処理 **/
-        var message = function(str){ $("#msg").prepend(str); };
-        fillWidth = parseInt($('#widthSelect').val());
+        /** チャットの処理 **/
+        var message = function(str){ $("#msg").text(str); };
+        var reloadMembers = function(members) {
+          $("#membersCount").text(members.length);
+          $("#members").text(members.join(', '));
+        };
 
         var post_comment = function() {
           if($('#comment').val() != ""){
@@ -36,6 +39,8 @@
         ws_chat = new WebSocket("ws://<%= request.host %>:8080/chat?room=<%= @room %>&user=<%= @user %>");
         ws_chat.onmessage = function(evt) { 
           var data = JSON.parse(evt.data);
+          if(data['members']) reloadMembers(data['members']); // 参加者が来たら更新
+
           $("#comments").prepend([
             "<tr>", 
             "<td class='time'>[", data['time'], "]</td>", 
@@ -45,7 +50,7 @@
             ].join('')); 
         };
         ws_chat.onclose = function() { message("接続が解除されました。"); };
-        ws_chat.onopen = function()  { message("入室しました。"); }
+        ws_chat.onopen  = function() { }//message("入室しました。"); }
         
         $("#comment_form").submit(function(e){
           post_comment();
@@ -57,6 +62,7 @@
         // 各種データの初期化
         canvas = document.getElementById('mainCanvas');
         ws_paint = new WebSocket("ws://<%= request.host %>:8080/paint?room=<%= @room %>&user=<%= @user %>");
+        fillWidth = parseInt($('#widthSelect').val());
 
         // データの受信処理
         ws_paint.onmessage = function(evt) {
@@ -69,9 +75,7 @@
         }
 
         // 線幅
-        $('#widthSelect').change(function() {
-          fillWidth = parseInt($('#widthSelect').val());
-        });
+        $('#widthSelect').change(function() { fillWidth = parseInt($('#widthSelect').val()); });
 
         // 以下、キャンバス関連
         if(canvas) {
@@ -93,7 +97,7 @@
               adjustXY(e);
               tempLineData.coodinates.push({x: mouseX, y:mouseY});
 
-              if(tempLineData.coodinates.length >= 3) {
+              if(3 <= tempLineData.coodinates.length) {
                 var start = tempLineData.coodinates.shift();
                 var middle = tempLineData.coodinates[0];
                 var dest = tempLineData.coodinates[1];
@@ -109,12 +113,10 @@
           $('#clearButton').click(function() {
             if(window.confirm('キャンバス消します')) {
               ws_paint.send(JSON.stringify({'clear': true}));
-              //clearCanvas();
             }
           });
 
           var clearCanvas = function() {
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             alert('キャンバスがクリアされました。');
           }
@@ -145,7 +147,6 @@
             if(window.localStorage.imageData) {
               attachLoadImageEvent();
             }
-
           }
         }
       });
@@ -160,9 +161,9 @@
       // 実線の描画
       function drawLine(start, middle, dest, color, width) {
         var x1 = (start.x + middle.x) / 2;
-        var x2 = (dest.x + middle.x) / 2;
         var y1 = (start.y + middle.y) / 2;
-        var y2 = (dest.y + middle.y) / 2;
+        var x2 = (dest.x  + middle.x) / 2;
+        var y2 = (dest.y  + middle.y) / 2;
 
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
@@ -215,6 +216,7 @@
           <input type=submit id=submit value=発言する />
         </form>
         <p id=msg></p>
+        <div id=memberList>参加者(<span id=membersCount></span>): <span id=members></span></div>
       </div>
       <table id="comments">
       </table>
