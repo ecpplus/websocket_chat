@@ -32,11 +32,14 @@
       <p>「部屋」に同じ文字を入力した人とおえかきチャットが出来ます。部屋は何人でも入れます。</p>
     </section>
     <section id=loginSection style="display: none">
+      <% if @message %>
+        <p style="color:red; "><%= @message %></p>
+      <% end %>
       <form action="room" id=login method="POST">
         <label for=title>部屋 :</label>
-        <input type=text id=title name=title size=20 /><br />
+        <input type=text id=title name=title size=20 />(必須)<br />
         <label for=title>名前 :</label>
-        <input type=text id=user name=user size=20 /><br />
+        <input type=text id=user name=user size=20 />(必須)<br />
         <input type=submit id=submit value="部屋を作成 or 入室" />
       </form>
     </section>

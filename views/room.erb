@@ -20,6 +20,7 @@
       var tempLineData;
       var ws_paint;
       var ws_chat;
+      var user_id;
 
       $(document).ready(function() {
         /** チャットの処理 **/
@@ -74,12 +75,8 @@
           uploadRequest.onreadystatechange = function(){
             if( uploadRequest.readyState == 4 && uploadRequest.status == 200 ){
               var sourceStr = ['data:', file.type, ';base64,', uploadRequest.responseText].join('');
-              var image = new Image();
-              image.onload = function() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(image, 0, 0, image.width, image.height);
-              }
-              image.src = sourceStr;
+              loadImage(sourceStr);
+              ws_paint.send(JSON.stringify({'loadImage':true, 'imageData': sourceStr}));
             }
           }
           uploadRequest.open('POST', '/upload');
@@ -92,12 +89,25 @@
           var data = JSON.parse(evt.data);
           if(data['clear']) {
             clearCanvas();
+          } else if(data['loadImage']) {
+            // 画像データを受信したら描画
+            loadImage(data['imageData']);
+          } else if(data['sync_send'] && data['sync_from_user'] == '<%= @user %>') {
+            // データを送信する処理
+            ws_paint.send(JSON.stringify({
+              'sync_receive': true,
+              'sync_to_user': data['sync_to_user'], 
+              'imageData': canvas.toDataURL("image/png")
+            }));
+          } else if(data['sync_receive'] && data['sync_to_user'] == '<%= @user %>') {
+            // データを受信して描画する処理
+            loadImage(data['imageData']);
           } else {
             drawLine(data.start, data.middle, data.dest, data.color, data.width);
           }
         }
 
-        // 線幅
+        // 線幅を変更する処理
         $('#widthSelect').change(function() { fillWidth = parseInt($('#widthSelect').val()); });
 
         // 以下、キャンバス関連
@@ -132,11 +142,10 @@
             }
           });
 
+          // クリア処理
           $('#clearButton').removeAttr('disabled');
           $('#clearButton').click(function() {
-            if(window.confirm('キャンバス消します')) {
-              ws_paint.send(JSON.stringify({'clear': true}));
-            }
+            if(window.confirm('キャンバス消します')) ws_paint.send(JSON.stringify({'clear': true}));
           });
 
           var clearCanvas = function() {
@@ -144,17 +153,23 @@
             alert('キャンバスがクリアされました。');
           }
 
+          // 画像をキャンパスに書き込む
+          var loadImage = function(imageData) {
+            var image = new Image();
+            image.onload = function() {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            }
+            image.src = imageData;
+          }
+
+          // ロード処理
           if(Modernizr.localstorage) {
             var attachLoadImageEvent = function(){
               $('#loadButton').removeAttr('disabled');
               $('#loadButton').click(function() {
                 if(window.confirm('保存した画像をロードします。現在のデータは消えます。')) {
-                  var image = new Image();
-                  image.onload = function() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                  }
-                  image.src = window.localStorage.imageData;
+                  loadImage(window.localStorage.imageData);
                 }
               });
             }
@@ -181,9 +196,7 @@
               twitterRequest.send(canvas.toDataURL('image/png'));
             });
 
-            if(window.localStorage.imageData) {
-              attachLoadImageEvent();
-            }
+            if(window.localStorage.imageData) attachLoadImageEvent();
           }
         }
       });
