@@ -1,0 +1,13 @@
+This is HTML5 websocket application.
+
+- Not AJAX, but Websockt.
+- You can share realtime synchronized canvas with others.
+- You can chat. 
+
+Using Sinatra, EventMachine::WebSocket.
+
+
+How to run.
+
+% ruby chat-ws.rb
+% ruby web.rb
