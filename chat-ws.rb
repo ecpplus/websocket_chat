@@ -18,20 +18,21 @@ EventMachine.run {
 
   EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8080, :debug => false) do |ws|
     ws.onopen {
-      room_name = ws.request['Query']['room']
-      user_name = ERB::Util.h(ws.request['Query']['user'])
+      room_name = ws.request['Query']['room'].force_encoding('UTF-8')
+      user_name = ERB::Util.h(ws.request['Query']['user']).force_encoding('UTF-8')
 
       # chat は /chat, お絵かきは /paint
       case URI.split(ws.request['Path'])[5]
       when '/chat'
         # チャンネルを取得(or作成)して、そこに入る
         channel = @chat_channels[room_name] || (@chat_channels[room_name] = EM::Channel.new)
-        sid = channel.subscribe { |msg| ws.send msg }
+        sid = channel.subscribe { |msg| ws.send msg.force_encoding("ASCII-8BIT") }
 
         members = @members[room_name] || (@members[room_name] = {})
         members[sid] = user_name
 
         ws.onmessage { |msg|
+          msg.force_encoding('UTF-8') 
           channel.push({
             :user    => user_name,
             :comment => ERB::Util.h(msg),
