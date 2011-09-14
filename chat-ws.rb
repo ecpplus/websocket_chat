@@ -1,5 +1,7 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
 require 'rubygems'
-require 'em-websocket/lib/em-websocket'
+require './em-websocket/lib/em-websocket'
 require 'cgi'
 require 'uri'
 require 'json'
